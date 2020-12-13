@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["ryan <chai_xb@163.com>"]
 edition = "2018"
 description = "Get all images dimensions in folder"
-license = "mit-license"
+license = "MIT"
 
 [[bin]]
 name="gai"
