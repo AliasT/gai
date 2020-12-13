@@ -1,0 +1,17 @@
+[package]
+name = "get-all-images"
+version = "0.1.0"
+authors = ["ryan <chai_xb@163.com>"]
+edition = "2018"
+
+[[bin]]
+name="gai"
+path="src/main.rs"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = "3.0.0-beta.2"
+image = "0.23.12"
+regex = "1.4.2"
+serde = {version = "1.0.118", features = ["derive"] }
+serde_json = "1.0.60"
