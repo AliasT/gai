@@ -1,7 +1,7 @@
 use clap::Clap;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json;
 
 use std::sync::{Arc, Mutex};
 use std::{
@@ -17,8 +17,8 @@ use std::path::Path;
 #[clap(version = "1.0", author = "chai_xb@163.com")]
 struct Opts {
     input: Option<String>,
-    // #[clap(short, long, parse(from_occurrences))]
-    // verbose: i32,
+    #[clap(short = 'e', long)]
+    regex: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,14 +42,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         if let Ok(entry) = entry {
             if entry.path().is_file() {
                 let shared_result = result.clone();
-                if re.is_match(
-                    entry
-                        .path()
-                        .extension()
-                        .unwrap_or_default()
-                        .to_str()
-                        .unwrap_or_default(),
-                ) {
+                // 符合图片后缀
+                let filepath = entry.path();
+                let extension = filepath
+                    .extension()
+                    .unwrap_or_default()
+                    .to_str()
+                    .unwrap_or_default();
+                let inline = || -> () {
                     let handle = thread::spawn(move || {
                         let dimensions = image_dimensions(entry.path()).unwrap();
                         shared_result.lock().unwrap().push(Entity {
@@ -60,6 +60,16 @@ fn main() -> Result<(), Box<dyn Error>> {
                     });
 
                     handles.push(handle);
+                };
+                if re.is_match(extension) {
+                    if let Some(ref include) = opts.regex {
+                        let include_regex = Regex::new(include);
+                        if include_regex.unwrap().is_match(filepath.to_str().unwrap()) {
+                            inline();
+                        }
+                    } else {
+                        inline();
+                    }
                 }
             }
         }
@@ -71,7 +81,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     let result = result.lock().unwrap();
 
-    println!("{}", json!(*result));
+    // WTF
+    // println!("{:?}", serde_json::to_string_pretty(&*result).unwrap());
+    println!("{}", serde_json::json!(*result));
 
     Ok(())
 }
