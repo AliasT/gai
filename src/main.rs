@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap_or_default()
                     .to_str()
                     .unwrap_or_default();
-                let inline = || -> () {
+                let inline = || {
                     let handle = thread::spawn(move || {
                         let dimensions = image_dimensions(entry.path()).unwrap();
                         shared_result.lock().unwrap().push(Entity {
