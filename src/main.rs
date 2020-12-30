@@ -1,4 +1,6 @@
 use clap::Clap;
+
+use clipboard::{ClipboardContext, ClipboardProvider};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json;
@@ -17,8 +19,12 @@ use std::path::Path;
 #[clap(version = "1.0", author = "chai_xb@163.com")]
 struct Opts {
     input: Option<String>,
+
     #[clap(short = 'e', long)]
     regex: Option<String>,
+
+    #[clap(short = 'c', about = "auto copy to clipboard")]
+    autocopy: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -79,11 +85,21 @@ fn main() -> Result<(), Box<dyn Error>> {
         // Wait
         h.join().unwrap();
     }
+
     let result = result.lock().unwrap();
 
+    // let result = serde_json::json!(*result);
     // WTF
-    // println!("{:?}", serde_json::to_string_pretty(&*result).unwrap());
-    println!("{}", serde_json::json!(*result));
+    let result = serde_json::to_string_pretty(&*result).unwrap();
+    if opts.autocopy.unwrap_or(true) == true {
+        if let Ok(mut ctx) = ClipboardContext::new() {
+            ctx.set_contents(result.to_string()).unwrap();
+        } else {
+            println!("{}", result);
+        }
+    } else {
+        println!("{}", result);
+    }
 
     Ok(())
 }
